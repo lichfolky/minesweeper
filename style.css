@@ -1,0 +1,35 @@
+:root {
+    --grid-width: 10;
+}
+
+
+body {
+    background: #666;
+    font-family: Arial, sans-serif;
+    color: whitesmoke;
+    font-size: 1.75rem;
+    text-align: center;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-width), 40px);
+    justify-content: center;
+    margin: 2rem auto;
+    gap: 5px;
+}
+
+.cell {
+    background: #999;
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.cell.boom {
+    background: crimson;
+}
+
+.cell.safe {
+    background: cadetblue;
+}

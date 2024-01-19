@@ -1,21 +1,20 @@
 // removeme4 @ts-check
 
-// Counters
 let numMines;
 let gridHeight;
 let gridWidth;
 let numCells;
-let score = 0;
 
 // State
 let gameEnded = false;
-let mines;
+let mines = [];
+let score = 0;
 
 // Elements
 const gridElement = document.querySelector("div#grid");
 const gameMessage = document.querySelector("div#message");
 
-function startGame(argNumMines = 99, argGridHeight = 10, argGgridWidth = 10) {
+function startGame(argNumMines = 15, argGridHeight = 10, argGgridWidth = 10) {
     numMines = argNumMines;
     gridHeight = argGridHeight;
     gridWidth = argGgridWidth;
@@ -39,12 +38,14 @@ function resetMines() {
         mines.push(mineIndex);
     }
     console.log(mines.sort(compareNumbers));
+
 }
 
 function generateGrid() {
     for (let i = 0; i < numCells; i++) {
         const cellElement = document.createElement("div");
         cellElement.classList.add("cell");
+        cellElement.innerText = i;
         cellElement.setAttribute("data-num", i);
         gridElement.appendChild(cellElement);
         cellElement.addEventListener("click", onCellClick);
@@ -57,20 +58,28 @@ function onCellClick(event) {
     console.log(nCell);
     if (isBomb(nCell)) {
         cellElement.classList.add("boom");
-        quitGame();
+        quitGame(false);
     } else {
         score++;
         cellElement.classList.add("safe");
         cellElement.removeEventListener("click", onCellClick);
+        console.log("Score: ", score, numCells - numMines);
         if (score == numCells - numMines) {
-            quitGame();
+            quitGame(true);
         }
     }
 }
 
-function quitGame() {
-    gameMessage.innerText = "Game ended - score: " + score;
+function quitGame(won) {
+    if (won) {
+        gameMessage.innerText = "You won 🥳";
+
+    } else {
+        gameMessage.innerText = "Game ended 😔 - score: " + score;
+    }
+
     gameEnded = true;
+
     let cellElements = gridElement.querySelectorAll(".cell");
     for (const cellElement of cellElements) {
         cellElement.removeEventListener("click", onCellClick);
@@ -89,4 +98,12 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+
 startGame();
+
+let str = "";
+for (let i = 0; i < numCells; i++) {
+    if (!mines.includes(i))
+        str += i + ", ";
+}
+console.log(str);

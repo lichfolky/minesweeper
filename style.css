@@ -26,12 +26,16 @@ body {
     display: grid;
     place-content: center;
     color: #99F;
+    font-weight: 700;
 }
 
 .cell.boom {
     background: crimson;
+    color: white;
+
 }
 
-.cell.safe {
+.cell.visited {
     background: cadetblue;
+    color: black;
 }

@@ -1,6 +1,6 @@
 // removeme4 @ts-check
 
-import { randomInt, compareNumbers } from "./utils.js";
+import { createMatrix, printGrid, randomInt, compareNumbers, nRandomInt } from "./utils.js";
 
 let numMines;
 let gridHeight;
@@ -26,9 +26,12 @@ function startGame(argNumMines = 10, argGridHeight = 10, argGgridWidth = 10) {
     gridWidth = argGgridWidth;
     numCells = gridHeight * gridWidth;
 
-    createGrid();
-    resetMines();
+    grid = createMatrix(gridHeight, gridWidth);
+    exploreGrid = createMatrix(gridHeight, gridWidth, false);
+    gridDom = createGridDom();
+    mines = nRandomInt(numMines, 0, numCells - 1);
     createMines();
+
     printGrid(grid);
 
     score = 0;
@@ -36,33 +39,15 @@ function startGame(argNumMines = 10, argGridHeight = 10, argGgridWidth = 10) {
     gameEnded = false;
 }
 
-function resetMines() {
-    mines = [];
-    for (let i = 0; i < numMines; i++) {
-        let mineIndex;
-        do {
-            mineIndex = randomInt(0, numCells - 1);
-        } while (mines.includes(mineIndex));
-        mines.push(mineIndex);
-    }
-    console.log(mines.sort(compareNumbers));
-}
-
-function createGrid() {
-    grid = [];
-    gridDom = [];
-    exploreGrid = [];
-
+function createGridDom() {
+    let gridDom = [];
     for (let x = 0; x < gridHeight; x++) {
-        grid[x] = [];
         gridDom[x] = [];
-        exploreGrid[x] = [];
         for (let y = 0; y < gridWidth; y++) {
-            grid[x][y] = 0;
             gridDom[x][y] = createGridElement(x * gridWidth + y);
-            exploreGrid[x][y] = false;
         }
     }
+    return gridDom;
 }
 
 /*
@@ -103,24 +88,11 @@ function up(x, y) {
 function createGridElement(i) {
     const cellElement = document.createElement("div");
     cellElement.classList.add("cell");
-    cellElement.innerText = i;
     cellElement.setAttribute("data-num", i);
-    gridElement.appendChild(cellElement);
     cellElement.addEventListener("click", onCellClick);
+    cellElement.addEventListener("contextmenu", setFlag);
+    gridElement.appendChild(cellElement);
     return cellElement;
-}
-
-function printGrid(matrix) {
-    for (let x = 0; x < matrix.length; x++) {
-        let row = "";
-        for (let y = 0; y < matrix[x].length; y++) {
-            if (grid[x][y] >= 0)
-                row += " " + grid[x][y] + " ";
-            else
-                row += grid[x][y] + " ";
-        }
-        console.log(row);
-    }
 }
 
 function onCellClick(event) {
@@ -136,10 +108,27 @@ function onCellClick(event) {
     }
 }
 
+function setFlag(event) {
+    let cellElement = event.target;
+    let nCell = parseInt(cellElement.getAttribute('data-num'));
+    let x = Math.floor(nCell / gridWidth);
+    let y = nCell % gridWidth;
+
+    if (gridDom[x][y].classList.contains("flag")) {
+        gridDom[x][y].classList.remove("flag");
+        gridDom[x][y].addEventListener("click", onCellClick);
+    } else {
+        gridDom[x][y].classList.add("flag");
+        gridDom[x][y].removeEventListener("click", onCellClick);
+    }
+    event.preventDefault();
+}
+
 function visit(x, y) {
     exploreGrid[x][y] = true;
     gridDom[x][y].classList.add("visited");
-    gridDom[x][y].removeEventListener("click", onCellClick);
+    gridDom[x][y].classList.remove("flag");
+    removeEventListeners(gridDom[x][y]);
     if (grid[x][y] > 0) {
         gridDom[x][y].innerText = grid[x][y];
     } else {
@@ -150,6 +139,11 @@ function visit(x, y) {
         console.log(score, numCells - numMines);
         endGame(true);
     }
+}
+
+function removeEventListeners(element) {
+    element.removeEventListener('contextmenu', setFlag);
+    element.removeEventListener("click", onCellClick);
 }
 
 function explore(x, y) {
@@ -187,7 +181,7 @@ function endGame(won) {
     gameEnded = true;
     let cellElements = gridElement.querySelectorAll(".cell");
     for (const cellElement of cellElements) {
-        cellElement.removeEventListener("click", onCellClick);
+        removeEventListeners(cellElement);
     }
 }
 

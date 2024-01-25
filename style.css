@@ -35,7 +35,6 @@ body {
 .cell.boom {
     background: crimson;
     color: white;
-
 }
 
 .cell.visited {
@@ -46,4 +45,12 @@ body {
 .cell.flag::before {
     content: "?";
     color: black;
+}
+
+.cell.boom.flag::before {
+    content: "";
+}
+
+.cell.visited.flag::before {
+    content: "";
 }
